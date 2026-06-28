@@ -49,6 +49,23 @@ Phase 1 is the smallest user-testable win and must work **first time** when the 
 
 Defer everything not on the core path to a later phase. Do not gold-plate.
 
+## Frontend slice requirements
+
+When your slice includes the `frontend/` surface:
+
+- **Playwright E2E setup is mandatory.** Install Playwright (`pnpm add -D @playwright/test`), run `npx playwright install --with-deps chromium`, and create `tests/e2e/smoke.spec.ts` (or `.js`) covering: (1) the page loads and is styled, (2) the primary input/interaction works, (3) real output appears. The gate runs `npx playwright test tests/e2e/` — if it doesn't exist or fails, the slice is BLOCKED.
+- **Observability wired.** If the backend uses LangGraph, confirm `LANGCHAIN_TRACING_V2` / `LANGCHAIN_API_KEY` env vars are in `.env.example` and the graph's `RunnableConfig` passes through them. If no LangGraph, add structured stdout logging for each request/response (timestamp, input summary, output summary, latency ms, error if any). Observability is a Phase 1 deliverable, not trailing.
+
+## Skeleton hygiene (prune what you replace)
+
+The baseline ships a working `transform_text` capability slot. When your slice replaces it, **delete or rewrite the leftovers it leaves behind** — do not ship dead skeleton artifacts that break the suite or mislead the next slice:
+
+- `tests/integration/test_pipeline.py` and any test using the obsolete `run_agent(str)` signature or the deprecated `POST /runs` route — rewrite against the real capability or delete it. A scaffold test that fails on a collection run is a BLOCKER.
+- Unused `transform_text` DB columns, prompts (`src/prompts/transform.md`), and nodes once the capability they served is gone.
+- Any README/`.env.example` line describing the old slot rather than what you built.
+
+Own this only for the surfaces your slice touches; never delete another slice's files.
+
 ## Process
 
 1. **Read** the phase + your slice + its gate command in `spec/roadmap.md`; read the backing capability spec, `spec/api.md`, `spec/data.md`, `spec/ui.md` (if frontend), and the relevant `harness/patterns/`.
