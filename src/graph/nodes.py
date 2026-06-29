@@ -215,15 +215,28 @@ Recent conversation:
 
 User question: {question}
 
-Decide: is this question ambiguous given the schema? A question is ambiguous if:
-- It references a vague concept ("trend", "performance", "value") when multiple numeric columns could satisfy it
-- It asks to compare things without specifying which columns to compare
-- It uses pronouns ("it", "that column") that cannot be resolved from conversation history
+Your default is PROCEED. A skilled data analyst almost never needs to ask a follow-up question.
 
-If AMBIGUOUS: respond with exactly this format:
-CLARIFICATION_NEEDED: <your clarification question, e.g. "I see columns revenue and units — which one should I plot as the trend?">
+ALWAYS respond PROCEED for these patterns (make a sensible default choice):
+- "Compare X vs Y" or "Compare cancelled vs non-cancelled" → filter/group on the obvious column and compare all numeric columns
+- "Summarize the dataset" or "Overview" or "Explore" → compute summary stats for all columns
+- "Show top customers / products / regions / categories" → group by the obvious dimension, aggregate, show top 10
+- "Show the trend" or "Plot over time" → use the date/time column and the most prominent numeric column
+- "What is the distribution of X?" → histogram or value counts of that column
+- "Average / total / count of X" → compute that aggregation
+- Any question where a reasonable default exists, even if multiple columns could qualify
 
-If CLEAR (can be answered without clarification): respond with exactly:
+ONLY respond CLARIFICATION_NEEDED when ALL of these are true:
+1. You genuinely cannot make a reasonable default choice (e.g. "plot it" with no prior context and multiple equally plausible columns AND no date column)
+2. The conversation history does not resolve the ambiguity
+3. Without the answer, you would produce a completely useless or misleading result
+
+If a pronoun like "it" or "that" resolves from the last 1–2 turns of conversation history, respond PROCEED.
+
+If TRULY AMBIGUOUS (meets all 3 conditions above): respond with exactly:
+CLARIFICATION_NEEDED: <one short clarifying question>
+
+Otherwise: respond with exactly:
 PROCEED
 
 Do not add any other text."""
