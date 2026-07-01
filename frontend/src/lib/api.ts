@@ -1,4 +1,9 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
+// Call the API on the same origin the page is served from (FastAPI serves both
+// the UI at /app/ and the API at /sessions). Works deployed and when served
+// locally via `python -m src`. Override with NEXT_PUBLIC_API_URL for `pnpm dev`.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:8001");
 
 export interface ColumnProfile {
   name: string;
