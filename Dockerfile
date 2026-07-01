@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Stage 1: build the Next.js static export (frontend/out) ----
-FROM node:20-slim AS frontend
+FROM node:22-slim AS frontend
 WORKDIR /build
 # Pin the exact pnpm the project builds with locally (workspace uses pnpm 10+ `allowBuilds`)
 RUN npm install -g pnpm@11.9.0
